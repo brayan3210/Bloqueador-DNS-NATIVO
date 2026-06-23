@@ -1,14 +1,15 @@
-# Dominios a bloquear ademas de las listas grandes.
+# Dominios que TU quieres bloquear (ademas de las listas grandes).
 # Se bloquea el dominio Y todos sus subdominios. Uno por linea.
-# (Muchos ya estan en las listas grandes; ponerlos aqui garantiza el bloqueo
-#  aunque una lista falle.) Lista de ejemplo: edita a tu gusto.
+# (Estos tambien suelen estar en las listas grandes; los pongo explicitos
+#  para garantizar el bloqueo aunque una lista falle.)
 
-# --- Tube sites conocidos ---
+# --- Los que nombraste / grandes conocidos (reales, verificados) ---
 pornhub.com
 xvideos.com
 xnxx.com
 toroporno.com
 hentaila.com
+xpaja.net
 spankbang.com
 redtube.com
 youporn.com
@@ -18,9 +19,26 @@ beeg.com
 tube8.com
 eporner.com
 tnaflix.com
+hclips.com
+drtuber.com
+nuvid.com
+sunporno.com
+porntrex.com
+porn300.com
+porngo.com
+pornone.com
+fapello.com
+erome.com
+motherless.com
+spankwire.com
+keezmovies.com
+extremetube.com
+fux.com
 porn.com
 sex.com
 hqporner.com
+porntn.com
+porndig.com
 
 # --- Camgirls / live ---
 chaturbate.com
@@ -30,19 +48,23 @@ camsoda.com
 livejasmin.com
 myfreecams.com
 cam4.com
+flirt4free.com
 
 # --- Hentai / animado ---
 nhentai.net
 hanime.tv
+hentaihaven.xxx
 rule34.xxx
+e-hentai.org
 
 # --- Suscripcion / modelos ---
 onlyfans.com
 fansly.com
 brazzers.com
 playboy.com
+manyvids.com
 
-# --- Redes con porno abundante (opcional) ---
+# --- X / Twitter (lo pediste: porno rampante ahi) ---
 x.com
 twitter.com
 t.co

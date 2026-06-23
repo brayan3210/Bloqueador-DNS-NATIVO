@@ -1,19 +1,9 @@
 # Configuracion local (contiene el hash de contrasena; NO subir)
 config.json
 
-# Artefactos de ejecucion / especificos de la maquina
-estado.txt
+# Artefactos sin valor para el repo
 dns_backup.json
 .parar
-
-# Logs (no subir contenido, conservar la carpeta)
-logs/*
-!logs/.gitkeep
-
-# Listas grandes descargadas por actualizar_listas.py (no versionar, ~6 MB)
-listas/lista_porno_*.txt
-listas/*_stevenblack.txt
-listas/*_hagezi.txt
 
 # Python
 __pycache__/

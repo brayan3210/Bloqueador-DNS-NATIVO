@@ -1,0 +1,5 @@
+﻿=== Estado 06/23/2026 16:36:26 ===
+Procesos del filtro activos: 2
+--- Disparadores de la tarea (debe aparecer MSFT_TaskBootTrigger = al arrancar Windows) ---
+MSFT_TaskBootTrigger, MSFT_TaskLogonTrigger
+Estado de la tarea: Running

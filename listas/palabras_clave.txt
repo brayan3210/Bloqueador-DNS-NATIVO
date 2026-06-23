@@ -2,18 +2,21 @@
 # Una por linea. Coincidencia de texto dentro del nombre del dominio.
 #   "porn" bloquea porn.com, redporn.net, pornhub.com, etc.
 #
-# REGLAS (para que funcionen):
-#   - NO sirven frases con espacios: un dominio nunca tiene espacios.
+# REGLAS (para que de verdad funcionen):
+#   - NO sirven frases con espacios: un dominio NUNCA tiene espacios.
+#     ("culos grandes", "violet miyers" = terminos de BUSQUEDA, no dominios;
+#      no se pueden bloquear por DNS, van mas abajo solo como referencia).
 #   - Evita palabras de 1-2 letras: "x" bloquearia example.com, max.com, etc.
-#   - Lista de ejemplo: ajustala a tus necesidades.
+#     (X/Twitter va como DOMINIO en dominios_personalizados.txt).
 
-# ---- Nucleo (seguras) ----
+# ---- Nucleo porno (seguras) ----
 porn
 porno
 xxx
 xvideos
 xnxx
 hentai
+hentaila
 camgirl
 camsex
 sexcam
@@ -28,6 +31,10 @@ xhamster
 chaturbate
 stripchat
 bongacams
+toroporno
+createporn
+xpaja
+blackcock
 nsfw
 milf
 bdsm
@@ -38,14 +45,36 @@ eporner
 tnaflix
 fapello
 rule34
+redwap
 
-# ---- Agresivas (pueden bloquear de mas; comenta lo que te rompa sitios) ----
-#   "anal" -> bloquea tambien "analytics", "canal"
-#   "sex"  -> bloquea tambien "essex", "sussex"
-#   "cock" -> bloquea tambien "cockpit", "peacock"
+# ---- Agresivas (OJO: pueden bloquear de mas) ----
+# Descomenta/comenta segun te rompa sitios legitimos:
+#   "anal"  -> bloquea tambien "analytics", "canal", "analisis"
+#   "sex"   -> bloquea tambien "essex", "sussex", "middlesex"
+#   "cock"  -> bloquea tambien "cockpit", "peacock"
+#   "corridas" -> en espanol tambien es toreo (corridas de toros)
 sex
 anal
 cock
 fuck
 nude
 nudes
+penes
+vaginas
+corridas
+
+# ============================================================
+# TERMINOS DE BUSQUEDA (NO se pueden bloquear por DNS, solo referencia).
+# El filtro bloquea DESTINOS (paginas), no el texto que escribes en Google.
+# Para frenar estas busquedas haria falta SafeSearch o MITM (descartado).
+# ------------------------------------------------------------
+# violet miyers
+# rose monroee
+# lela star
+# chubby girl
+# culos grandes
+# tetas grandes
+# porno agresivo
+# sexo anal
+# modelos webcam
+# BBC            -> NO se pone como palabra: bloquearia bbc.com (noticias)
