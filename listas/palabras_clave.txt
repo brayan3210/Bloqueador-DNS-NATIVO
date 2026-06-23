@@ -1,0 +1,51 @@
+# PALABRAS CLAVE — se bloquea cualquier DOMINIO que CONTENGA estas cadenas.
+# Una por linea. Coincidencia de texto dentro del nombre del dominio.
+#   "porn" bloquea porn.com, redporn.net, pornhub.com, etc.
+#
+# REGLAS (para que funcionen):
+#   - NO sirven frases con espacios: un dominio nunca tiene espacios.
+#   - Evita palabras de 1-2 letras: "x" bloquearia example.com, max.com, etc.
+#   - Lista de ejemplo: ajustala a tus necesidades.
+
+# ---- Nucleo (seguras) ----
+porn
+porno
+xxx
+xvideos
+xnxx
+hentai
+camgirl
+camsex
+sexcam
+camsoda
+escort
+onlyfans
+brazzers
+redtube
+youporn
+spankbang
+xhamster
+chaturbate
+stripchat
+bongacams
+nsfw
+milf
+bdsm
+fetish
+playboy
+hardcore
+eporner
+tnaflix
+fapello
+rule34
+
+# ---- Agresivas (pueden bloquear de mas; comenta lo que te rompa sitios) ----
+#   "anal" -> bloquea tambien "analytics", "canal"
+#   "sex"  -> bloquea tambien "essex", "sussex"
+#   "cock" -> bloquea tambien "cockpit", "peacock"
+sex
+anal
+cock
+fuck
+nude
+nudes

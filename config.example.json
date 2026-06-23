@@ -1,0 +1,10 @@
+{
+  "listen_addr": "127.0.0.1",
+  "listen_port": 53,
+  "upstream": "1.1.1.1",
+  "upstream2": "1.0.0.1",
+  "upstream_port": 53,
+  "block_response": "0.0.0.0",
+  "log_blocked": true,
+  "password_hash": ""
+}

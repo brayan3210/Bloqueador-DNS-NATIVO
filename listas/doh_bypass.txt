@@ -1,0 +1,26 @@
+# Servidores DoH (DNS over HTTPS) y de evasion. Se bloquean para que el
+# navegador no pueda hacer DNS por su cuenta saltandose el filtro.
+cloudflare-dns.com
+mozilla.cloudflare-dns.com
+chrome.cloudflare-dns.com
+security.cloudflare-dns.com
+family.cloudflare-dns.com
+one.one.one.one
+dns.google
+dns.google.com
+dns64.dns.google
+dns.quad9.net
+dns10.quad9.net
+dns11.quad9.net
+doh.opendns.com
+doh.familyshield.opendns.com
+doh.cleanbrowsing.org
+dns.nextdns.io
+firefox.dns.nextdns.io
+doh.dns.sb
+dns.adguard.com
+dns-family.adguard.com
+dns-unfiltered.adguard.com
+doh.libredns.gr
+dns.switch.ch
+doh.mullvad.net
