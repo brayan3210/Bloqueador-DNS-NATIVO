@@ -78,8 +78,62 @@ def modo_check():
         existe = os.path.exists(r)
         ok = ok and existe
         print(("  OK " if existe else "  FALTA "), os.path.relpath(r, base))
+    pyi = os.path.join(base, PY_INSTALLER)
+    print(("  OK " if os.path.exists(pyi) else "  (sin)"), PY_INSTALLER, "(Python embebido)")
     print("RESULTADO:", "TODO PRESENTE" if ok else "FALTAN ARCHIVOS")
     return 0 if ok else 1
+
+
+# --------------------------------------------------------------------------
+# Python: instalar el oficial EMBEBIDO si el equipo no lo tiene
+# --------------------------------------------------------------------------
+PY_INSTALLER = "python-3.12.0-amd64.exe"
+
+
+def _localizar_python(log=None):
+    """Devuelve la ruta a python.exe. Tras instalar, el PATH del proceso actual
+    no se refresca, asi que buscamos en las rutas estandar y la anexamos al PATH
+    para que los procesos hijos (los .ps1) tambien lo encuentren."""
+    p = hay_python()
+    if p:
+        return p
+    local = os.environ.get("LOCALAPPDATA", "")
+    cands = [
+        r"C:\Program Files\Python312\python.exe",
+        r"C:\Program Files\Python313\python.exe",
+        os.path.join(local, r"Programs\Python\Python312\python.exe"),
+        os.path.join(local, r"Programs\Python\Python313\python.exe"),
+    ]
+    for c in cands:
+        if c and os.path.exists(c):
+            os.environ["PATH"] = os.path.dirname(c) + os.pathsep + os.environ.get("PATH", "")
+            if log:
+                log(f"   Python instalado en: {c}")
+            return c
+    return None
+
+
+def instalar_python(base, log):
+    """Instala Python 3.12.0 desde el instalador oficial EMBEBIDO (sin internet).
+    Si por algun motivo no esta embebido, intenta winget. Devuelve ruta o None."""
+    emb = os.path.join(base, PY_INSTALLER)
+    if os.path.exists(emb):
+        log("Python no encontrado. Instalando Python 3.12.0 (incluido)...")
+        try:
+            subprocess.run([emb, "/quiet", "InstallAllUsers=1",
+                            "PrependPath=1", "Include_pip=1"],
+                           check=False, timeout=1800)
+        except Exception as e:
+            log(f"   fallo el instalador incluido: {e}")
+    else:
+        log("Python no encontrado. Intentando con winget...")
+        try:
+            subprocess.run(["winget", "install", "--id", "Python.Python.3.12", "-e",
+                            "--accept-source-agreements", "--accept-package-agreements"],
+                           check=False)
+        except Exception as e:
+            log(f"   winget fallo: {e}")
+    return _localizar_python(log)
 
 
 # --------------------------------------------------------------------------
@@ -88,22 +142,14 @@ def modo_check():
 def ejecutar_instalacion(password, log):
     base = base_payload()
 
-    # 1) Python
+    # 1) Python (si falta, instalar el 3.12.0 EMBEBIDO -> sin internet ni winget)
     log("Comprobando Python...")
     py = hay_python()
     if not py:
-        log("Python no encontrado. Intentando instalarlo con winget...")
-        try:
-            subprocess.run(
-                ["winget", "install", "--id", "Python.Python.3.12", "-e",
-                 "--accept-source-agreements", "--accept-package-agreements"],
-                check=False)
-        except Exception as e:
-            log(f"No se pudo instalar Python automaticamente: {e}")
-        py = hay_python()
+        py = instalar_python(base, log)
     if not py:
-        log("ERROR: se necesita Python 3.8+ instalado. Instalalo desde "
-            "python.org (marca 'Add to PATH') y reintenta.")
+        log("ERROR: no se pudo preparar Python. Instalalo desde python.org "
+            "(marca 'Add to PATH') y reintenta.")
         return False
     log(f"Python: {py}")
 

@@ -19,6 +19,8 @@ proxy_busquedas/logs/
 instalador/build/
 instalador/payload/
 instalador/*.spec
+# Instalador de Python embebido (binario grande; se descarga al construir)
+instalador/vendor/
 
 # Python
 __pycache__/

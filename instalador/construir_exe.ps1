@@ -21,6 +21,19 @@ foreach ($f in $rootFiles) { if (Test-Path "$ROOT\$f") { Copy-Item "$ROOT\$f" $P
 Copy-Item "$INST\TERMINOS.txt" $PAYLOAD -Force
 if (Test-Path "$INST\icono.ico") { Copy-Item "$INST\icono.ico" $PAYLOAD -Force }
 
+# Python oficial EMBEBIDO (para equipos sin Python; sin depender de internet/winget)
+$pyInst = Join-Path $INST "vendor\python-3.12.0-amd64.exe"
+if (-not (Test-Path $pyInst)) {
+    Write-Host "   Descargando Python 3.12.0 (solo la primera vez)..."
+    New-Item -ItemType Directory -Force -Path (Split-Path $pyInst) | Out-Null
+    try {
+        Invoke-WebRequest -Uri "https://www.python.org/ftp/python/3.12.0/python-3.12.0-amd64.exe" `
+            -OutFile $pyInst -UseBasicParsing
+    } catch { Write-Host "   (no se pudo descargar Python: $_)" -ForegroundColor Yellow }
+}
+if (Test-Path $pyInst) { Copy-Item $pyInst $PAYLOAD -Force; Write-Host "   Python 3.12.0 embebido incluido." }
+else { Write-Host "   AVISO: sin Python embebido (el .exe usara winget como respaldo)." -ForegroundColor Yellow }
+
 # TODAS las listas, INCLUIDAS las grandes (StevenBlack/Hagezi ~260k dominios).
 # Asi el .exe trae TODO y el cliente no configura ni descarga nada.
 Copy-Item "$ROOT\listas\*.txt" "$PAYLOAD\listas\" -Force
