@@ -4,6 +4,16 @@ config.json
 # Artefactos sin valor para el repo
 dns_backup.json
 .parar
+.parar_proxy
+
+# Certificado del proxy de busquedas (CONTIENE LA CLAVE PRIVADA: NUNCA subir)
+proxy_busquedas/mitmproxy/
+*.pem
+*.cer
+*.p12
+
+# Logs del modulo de busquedas
+proxy_busquedas/logs/
 
 # Python
 __pycache__/

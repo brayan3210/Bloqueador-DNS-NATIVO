@@ -6,5 +6,10 @@
   "upstream_port": 53,
   "block_response": "0.0.0.0",
   "log_blocked": true,
-  "password_hash": ""
+  "password_hash": "",
+  "proxy_busquedas": {
+    "enabled": true,
+    "puerto": 8080,
+    "listen_host": "127.0.0.1"
+  }
 }

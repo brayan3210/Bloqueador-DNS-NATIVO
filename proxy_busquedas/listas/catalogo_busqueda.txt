@@ -1,0 +1,127 @@
+# CATALOGO DE BUSQUEDA — terminos porno que se bloquean cuando los ESCRIBES
+# en un buscador (Google, Bing, YouTube, DuckDuckGo, Yandex, etc.).
+# NO son dominios: es el TEXTO de la busqueda. Una entrada por linea.
+#
+# COMO SE COMPARA (ver motor_busqueda.py):
+#   - Palabra suelta  -> por INICIO de palabra:  "porn" atrapa
+#       porn / porno / pornografia   PERO NO   "essex" (por 'sex').
+#   - Frase con espacios -> por subcadena:  "nasty ass" atrapa la frase.
+#
+# EXCEPCIONES: las palabras anatomicas/educativas (pene, vagina, utero...)
+# van en excepciones_educativas.txt y NUNCA bloquean solas. Solo bloquean si
+# en la misma busqueda ADEMAS hay un termino explicito de ESTA lista
+# (ej.: "vagina xxx" -> bloquea por xxx;  "vagina anatomia" -> permite).
+#
+# Para desactivar un termino, ponle "#" delante.  Tras editar: aplicar_proxy.
+
+# ================= NUCLEO PORNO (seguras, poca colision) =================
+porn
+porno
+xxx
+sexo explicito
+xvideos
+xnxx
+xhamster
+redtube
+youporn
+spankbang
+chaturbate
+stripchat
+bongacams
+brazzers
+onlyfans
+camgirl
+camsoda
+camwhore
+eporner
+tnaflix
+fapello
+toroporno
+pornhub
+redwap
+hentai
+hentaila
+doujin
+rule34
+milf
+gilf
+bdsm
+bukkake
+gangbang
+deepthroat
+creampie
+cumshot
+blowjob
+handjob
+titjob
+fisting
+squirting
+hardcore porn
+softcore porn
+incesto
+zoofilia
+escort
+prostituta
+
+# ================= ESPANOL EXPLICITO =================
+follar
+follando
+follada
+mamada
+tetona
+tetonas
+culona
+culonas
+chibola
+nudes
+pack de nudes
+manda nudes
+
+# ================= TERMINOS QUE PEDISTE / BUSQUEDAS TIPICAS =================
+chubby
+nasty ass
+big ass
+phat ass
+fat ass
+sexo anal
+porno gay
+porno casero
+porno amateur
+video porno
+videos porno
+chica webcam
+modelo webcam
+culo grande
+culos grandes
+tetas grandes
+video sexual
+contenido sexual explicito
+
+# ================= AGRESIVAS (comentadas: rompen busquedas legitimas) =====
+# Descomenta SOLO si asumes los falsos positivos que se indican:
+#   anal   -> bloquea "analisis", "canal", "analitica"
+#   sex    -> bloquea "sexualidad", "educacion sexual", "transexual"
+#   sexo   -> bloquea "educacion sexo", "sexologo"
+#   cock   -> bloquea "cockpit", "peacock"
+#   ass    -> bloquea "assistant", "assassin", "bajass"
+#   nude   -> bloquea "nude" color de maquillaje
+#   corrida-> tambien es toreo (corrida de toros)
+#   desnudo-> tambien arte/"desnudo artistico"
+#   coger  -> en varios paises = tomar/agarrar (no sexual)
+#   paja   -> tambien es 'straw' / relleno
+# anal
+# sex
+# sexo
+# cock
+# ass
+# nude
+# corrida
+# desnudo
+# desnuda
+# coger
+# paja
+
+# ================= SIGLAS AMBIGUAS (NO recomendadas) =================
+# bbc  -> British Broadcasting (noticias). Si lo pones, rompe noticias BBC.
+#         Mejor apoyate en los terminos explicitos de arriba.
+# bbc

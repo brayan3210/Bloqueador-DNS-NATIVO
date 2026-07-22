@@ -1,0 +1,83 @@
+# EXCEPCIONES EDUCATIVAS — palabras anatomicas / de salud / de lectura que
+# NUNCA se bloquean POR SI SOLAS, aunque suenen fuerte.
+#
+# Sirven para que puedas estudiar biologia, salud o leer sin que el filtro
+# te frene ("pene", "vagina", "menstruacion", etc.).
+#
+# GARANTIA: cualquier palabra de esta lista se RESTA del catalogo al cargar,
+# asi que jamas bloquea sola. PERO si en la misma busqueda ademas escribes un
+# termino EXPLICITO del catalogo (porn, xxx, follar...), esa busqueda SI se
+# bloquea (ej.: "vagina xxx" -> bloqueada; "vagina anatomia" -> permitida).
+#
+# Una palabra por linea. Agrega las que necesites para tus estudios/lectura.
+
+# ---- Anatomia reproductiva ----
+pene
+penes
+falo
+prepucio
+glande
+testiculo
+testiculos
+escroto
+vagina
+vaginas
+vulva
+clitoris
+utero
+ovario
+ovarios
+trompas
+endometrio
+cervix
+labios genitales
+genitales
+organos sexuales
+aparato reproductor
+aparato reproductor femenino
+aparato reproductor masculino
+
+# ---- Pecho / otras ----
+seno
+senos
+mama
+mamas
+pezon
+pezones
+areola
+
+# ---- Fisiologia / salud sexual (educacion) ----
+ereccion
+eyaculacion
+semen
+esperma
+espermatozoide
+ovulo
+ovulacion
+menstruacion
+regla menstrual
+ciclo menstrual
+fertilidad
+fecundacion
+reproduccion
+reproductor
+gestacion
+embarazo
+parto
+libido
+hormonas
+testosterona
+estrogeno
+prostata
+condon
+preservativo
+anticonceptivo
+anticonceptivos
+metodos anticonceptivos
+enfermedades de transmision sexual
+its
+educacion sexual
+salud sexual
+salud reproductiva
+pubertad
+adolescencia

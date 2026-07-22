@@ -1,0 +1,3 @@
+# Dependencias de la capa "proxy de busquedas".
+# mitmproxy trae el ejecutable 'mitmdump' que hace de proxy con inspeccion TLS.
+mitmproxy>=10.0.0

@@ -144,9 +144,34 @@ Clear-DnsClientCache
   vigilante lo relanza). Para el objetivo del proyecto, eso es deseable.
 - **Fricción, no imposibilidad:** el dueño/administrador del equipo siempre puede
   removerlo con esfuerzo. El blindaje impide el borrado casual e impulsivo.
-- **Límite técnico:** bloquea **destinos** (páginas), no el **texto** que escribes
-  dentro del buscador (eso viaja cifrado; requeriría interceptar HTTPS/MITM, fuera
-  de alcance). Aun así, el destino porno queda bloqueado.
+- **Límite del filtro DNS:** por sí solo bloquea **destinos** (páginas), no el
+  **texto** que escribes dentro del buscador (viaja cifrado). Para eso está la
+  **capa opcional de búsquedas** (abajo), que sí inspecciona el texto en tu
+  propio equipo, sin SafeSearch.
+
+---
+
+## 🔎 Capa extra (opcional): bloqueo de BÚSQUEDAS por palabra
+
+El filtro DNS no ve el **texto** que escribes en Google/Bing/YouTube (viaja
+cifrado). El módulo opcional [`proxy_busquedas/`](proxy_busquedas/README.md)
+añade un **proxy local con inspección TLS** (mitmproxy) que **sí** lee ese texto
+en tu propio equipo y bloquea las búsquedas explícitas —incluida la de
+imágenes— **sin usar SafeSearch**.
+
+- Catálogo de términos porno **con excepciones educativas**: `pene`, `vagina`,
+  `menstruación`, etc. **no** bloquean solas (para biología/lectura); sí se
+  bloquea si aparece además un término explícito (`vagina xxx`).
+- Mismo modelo de la versión DNS: tarea SYSTEM que se mantiene viva, contraseña
+  compartida (SHA-256), y es **fricción fuerte, no imposibilidad**.
+
+```powershell
+proxy_busquedas\instalar_proxy.ps1      # instalar la capa
+proxy_busquedas\aplicar_proxy.ps1       # aplicar cambios del catálogo
+proxy_busquedas\desactivar_proxy.ps1    # quitar (pide contraseña)
+```
+
+Detalles y límites honestos en [`proxy_busquedas/README.md`](proxy_busquedas/README.md).
 
 ---
 
