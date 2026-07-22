@@ -19,6 +19,7 @@ $rootFiles = @("filtro.py","vigilante.py","actualizar_listas.py","configurar_pas
     "blindar_red.ps1","desinstalar.ps1","README.md","LICENSE")
 foreach ($f in $rootFiles) { if (Test-Path "$ROOT\$f") { Copy-Item "$ROOT\$f" $PAYLOAD -Force } }
 Copy-Item "$INST\TERMINOS.txt" $PAYLOAD -Force
+if (Test-Path "$INST\icono.ico") { Copy-Item "$INST\icono.ico" $PAYLOAD -Force }
 
 # TODAS las listas, INCLUIDAS las grandes (StevenBlack/Hagezi ~260k dominios).
 # Asi el .exe trae TODO y el cliente no configura ni descarga nada.
@@ -36,9 +37,10 @@ Write-Host "=== 3) Compilando el .exe ===" -ForegroundColor Cyan
 # PyInstaller escribe sus logs por stderr; que eso NO aborte el script.
 $ErrorActionPreference = "Continue"
 Push-Location $INST
+$iconArg = if (Test-Path "$INST\icono.ico") { @("--icon", "$INST\icono.ico") } else { @() }
 & $python -m PyInstaller --noconfirm --onefile --windowed `
     --name "FiltroContenido-Setup" `
-    --add-data "payload;payload" `
+    --add-data "payload;payload" @iconArg `
     --distpath "$INST\dist" --workpath "$INST\build" --specpath "$INST" `
     "instalador.py"
 $rc = $LASTEXITCODE
