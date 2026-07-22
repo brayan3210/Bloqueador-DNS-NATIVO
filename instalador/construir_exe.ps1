@@ -19,7 +19,9 @@ $rootFiles = @("filtro.py","vigilante.py","actualizar_listas.py","configurar_pas
     "blindar_red.ps1","desinstalar.ps1","README.md","LICENSE")
 foreach ($f in $rootFiles) { if (Test-Path "$ROOT\$f") { Copy-Item "$ROOT\$f" $PAYLOAD -Force } }
 Copy-Item "$INST\TERMINOS.txt" $PAYLOAD -Force
-if (Test-Path "$INST\icono.ico") { Copy-Item "$INST\icono.ico" $PAYLOAD -Force }
+foreach ($img in @("icono.ico", "escudo_hero.png", "paypal.png")) {
+    if (Test-Path "$INST\$img") { Copy-Item "$INST\$img" $PAYLOAD -Force }
+}
 
 # Python oficial EMBEBIDO (para equipos sin Python; sin depender de internet/winget)
 $pyInst = Join-Path $INST "vendor\python-3.12.0-amd64.exe"

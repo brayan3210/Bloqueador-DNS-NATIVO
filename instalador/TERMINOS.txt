@@ -44,13 +44,7 @@ con TODO lo siguiente.
        cubre apps con "certificate pinning" ni, por defecto, Firefox.
      • Puede haber falsos positivos: el catálogo de palabras lo puedes afinar.
 
-5. CÓMO DESACTIVARLO EN EL FUTURO
-     • Con la contraseña: ejecutar los desinstaladores incluidos.
-     • Si nadie la sabe: se puede fijar una contraseña NUEVA (sin pedir la
-       vieja) y con ella desinstalar; o hacer una desinstalación manual como
-       administrador. Nunca quedas atrapado para siempre.
-
-6. RESPONSABILIDAD
+5. RESPONSABILIDAD
    Software entregado "tal cual", sin garantías. Está pensado para instalarse en
    TU PROPIO equipo, con tu consentimiento. El uso es bajo tu responsabilidad.
    No lo instales en equipos ajenos sin permiso del dueño.
