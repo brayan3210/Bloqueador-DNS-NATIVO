@@ -1,0 +1,58 @@
+FILTRO DE CONTENIDO — TÉRMINOS DE USO Y CONSENTIMIENTO
+=======================================================
+
+Lee esto con calma antes de instalar. Al aceptar, entiendes y estás de acuerdo
+con TODO lo siguiente.
+
+1. QUÉ ES
+   Filtro de Contenido es una herramienta de AUTOCONTROL que bloquea material
+   pornográfico en TU propio equipo. Trabaja en dos capas:
+     • Filtro DNS: bloquea el acceso a sitios pornográficos (dominios) en
+       cualquier red, forzando todo el DNS del equipo a un filtro local.
+     • Capa de búsquedas: inspecciona SOLO el texto que escribes en los
+       buscadores (Google, Bing, YouTube, etc.) y bloquea las búsquedas
+       explícitas. NO usa el SafeSearch de Google.
+
+2. CÓMO PROTEGE (Y QUÉ CAMBIA EN TU EQUIPO)
+   Al instalar, este programa (con permisos de administrador):
+     • Cambia el DNS del sistema a un filtro local (127.0.0.1) y crea una regla
+       que fuerza ese DNS en cualquier red.
+     • Desactiva DNS-over-HTTPS en los navegadores (para que no evadan el filtro).
+     • Instala un certificado raíz LOCAL en tu equipo para poder leer el texto
+       de tus búsquedas en HTTPS. Este certificado NO se comparte con nadie ni
+       envía tu tráfico a ningún servidor: todo el filtrado ocurre en tu equipo.
+     • Desactiva QUIC/HTTP3 en los navegadores (necesario para inspeccionar).
+     • Crea tareas que se ejecutan como SYSTEM, arrancan con Windows y se
+       reinician solas, y protege sus carpetas para que no se borren por
+       accidente o por impulso.
+
+3. CONTRASEÑA (LA PARTE MÁS IMPORTANTE)
+   Antes de instalar se te pedirá una CONTRASEÑA. Solo se guarda su huella
+   (hash SHA-256); el texto nunca se almacena. Esa contraseña es la ÚNICA vía
+   "fácil" para desactivar el filtro después.
+   Recomendación de autocontrol (elige una):
+     a) Que la escriba un FAMILIAR o persona de confianza y NO te la diga.
+     b) Que la genere una IA, la copies aquí, y luego BORRES ese chat: así nadie
+        (ni tú) la conoce.
+   Si nadie sabe la contraseña, desactivar el filtro requiere pasos deliberados
+   (ver punto 5): esa dificultad es intencional, es lo que frena el impulso.
+
+4. LÍMITES HONESTOS
+     • Esto es FRICCIÓN FUERTE, no una cárcel: quien sea administrador del
+       equipo siempre podrá quitarlo con esfuerzo. No es infalible.
+     • La capa de búsquedas cubre navegadores (Chrome/Edge y similares); no
+       cubre apps con "certificate pinning" ni, por defecto, Firefox.
+     • Puede haber falsos positivos: el catálogo de palabras lo puedes afinar.
+
+5. CÓMO DESACTIVARLO EN EL FUTURO
+     • Con la contraseña: ejecutar los desinstaladores incluidos.
+     • Si nadie la sabe: se puede fijar una contraseña NUEVA (sin pedir la
+       vieja) y con ella desinstalar; o hacer una desinstalación manual como
+       administrador. Nunca quedas atrapado para siempre.
+
+6. RESPONSABILIDAD
+   Software entregado "tal cual", sin garantías. Está pensado para instalarse en
+   TU PROPIO equipo, con tu consentimiento. El uso es bajo tu responsabilidad.
+   No lo instales en equipos ajenos sin permiso del dueño.
+
+Licencia MIT · Brayan Cortés Leytón · Proyecto personal de autocontrol.

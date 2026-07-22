@@ -15,6 +15,11 @@ proxy_busquedas/mitmproxy/
 # Logs del modulo de busquedas
 proxy_busquedas/logs/
 
+# Instalador PyInstaller: ignorar temporales de build; el .exe final SI se sube
+instalador/build/
+instalador/payload/
+instalador/*.spec
+
 # Python
 __pycache__/
 *.pyc

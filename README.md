@@ -175,6 +175,22 @@ Detalles y límites honestos en [`proxy_busquedas/README.md`](proxy_busquedas/RE
 
 ---
 
+## 📦 Instalador todo-en-uno (.exe)
+
+Para instalar **todo** (filtro DNS + blindaje + capa de búsquedas) de una sola
+vez, o para distribuirlo, hay un instalador gráfico: `instalador/dist/FiltroContenido-Setup.exe`.
+Un solo archivo que lleva el proyecto dentro; al ejecutarlo pide administrador,
+**muestra los términos**, **pide la contraseña** (que la ponga un familiar o una
+IA y borres el chat) e instala todos los módulos.
+
+- Reconstruirlo: `instalador/construir_exe.ps1` (usa PyInstaller).
+- Verificarlo sin instalar: `FiltroContenido-Setup.exe --check`.
+
+Guía completa de uso (cómo ejecutar los `.ps1`, contraseñas, verificar el DNS en
+cualquier red): **[`COMO_USAR.md`](COMO_USAR.md)**.
+
+---
+
 ## 🗂️ Estructura del proyecto
 
 ```

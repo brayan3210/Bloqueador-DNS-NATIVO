@@ -30,6 +30,16 @@ CONFIG_CANDIDATOS = [
 
 DEFAULTS = {"enabled": True, "puerto": 8080, "listen_host": "127.0.0.1"}
 
+# Solo se INSPECCIONA el HTTPS de los buscadores; todo lo demas (winget, banca,
+# Windows Update, googlevideo/YouTube playback, apps con pinning...) pasa SIN
+# interceptar. Asi el proxy no rompe el resto del sistema. Es un regex de hosts
+# a IGNORAR = cualquiera que NO sea un buscador (lookahead negativo).
+IGNORE_HOSTS = (
+    r"^(?!.*(?:google\.|bing\.com|duckduckgo\.com|search\.yahoo|yahoo\.com|"
+    r"yandex\.|search\.brave|ecosia\.org|startpage\.com|qwant\.com|"
+    r"youtube\.com)).*"
+)
+
 
 def cargar_config():
     for ruta in CONFIG_CANDIDATOS:
@@ -78,6 +88,7 @@ def main():
         "-q",                      # silencioso (solo nuestros prints/log)
         "--set", "flow_detail=0",
         "--set", f"confdir={CONFDIR}",
+        "--ignore-hosts", IGNORE_HOSTS,   # solo interceptar buscadores
     ]
     print(f"[OK] Iniciando proxy de busquedas en "
           f"{cfg['listen_host']}:{cfg['puerto']}  (mitmdump)")
