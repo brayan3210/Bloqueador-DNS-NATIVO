@@ -28,7 +28,11 @@ import unicodedata
 
 BASE = os.path.dirname(os.path.abspath(__file__))
 LISTAS_DIR = os.path.join(BASE, "listas")
-CAT_PATH = os.path.join(LISTAS_DIR, "catalogo_busqueda.txt")
+# Archivos de terminos a BLOQUEAR (se pueden agregar mas .txt aqui).
+CAT_PATHS = [
+    os.path.join(LISTAS_DIR, "catalogo_busqueda.txt"),
+    os.path.join(LISTAS_DIR, "actrices_porno.txt"),
+]
 EXC_PATH = os.path.join(LISTAS_DIR, "excepciones_educativas.txt")
 
 
@@ -64,7 +68,9 @@ class Motor:
         self.recargar()
 
     def recargar(self):
-        catalogo = _cargar_lista(CAT_PATH)
+        catalogo = []
+        for ruta in CAT_PATHS:
+            catalogo += _cargar_lista(ruta)
         self.excepciones = set(_cargar_lista(EXC_PATH))
 
         # Garantia dura: una palabra de excepcion NUNCA queda en el catalogo,

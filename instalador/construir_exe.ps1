@@ -20,10 +20,11 @@ $rootFiles = @("filtro.py","vigilante.py","actualizar_listas.py","configurar_pas
 foreach ($f in $rootFiles) { if (Test-Path "$ROOT\$f") { Copy-Item "$ROOT\$f" $PAYLOAD -Force } }
 Copy-Item "$INST\TERMINOS.txt" $PAYLOAD -Force
 
-# Listas curadas (las GRANDES descargables NO se empaquetan: instalar.ps1 las baja)
-foreach ($l in @("dominios_personalizados.txt","doh_bypass.txt","ips_bloqueadas.txt","palabras_clave.txt")) {
-    if (Test-Path "$ROOT\listas\$l") { Copy-Item "$ROOT\listas\$l" "$PAYLOAD\listas\" -Force }
-}
+# TODAS las listas, INCLUIDAS las grandes (StevenBlack/Hagezi ~260k dominios).
+# Asi el .exe trae TODO y el cliente no configura ni descarga nada.
+Copy-Item "$ROOT\listas\*.txt" "$PAYLOAD\listas\" -Force
+$grandes = (Get-ChildItem "$PAYLOAD\listas\*.txt" | Measure-Object Length -Sum).Sum
+Write-Host ("   Listas empaquetadas: " + [math]::Round($grandes/1MB,1) + " MB")
 
 # Modulo de busquedas (sin certificado/logs/temporales)
 robocopy "$ROOT\proxy_busquedas" "$PAYLOAD\proxy_busquedas" /E /XD "mitmproxy" "logs" "__pycache__" /XF "*.pyc" ".parar_proxy" | Out-Null

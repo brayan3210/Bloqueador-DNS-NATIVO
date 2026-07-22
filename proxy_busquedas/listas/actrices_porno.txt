@@ -1,0 +1,60 @@
+# NOMBRES DE ACTRICES PORNO — se bloquean como busqueda (coincidencia por
+# subcadena de la frase completa "nombre apellido"). Se cargan junto al
+# catalogo_busqueda.txt (ver motor_busqueda.py).
+#
+# Van con nombre+apellido para reducir falsos positivos. Agrega/quita libremente.
+# Tras editar:  proxy_busquedas\aplicar_proxy.ps1
+
+mia khalifa
+riley reid
+lana rhoades
+abella danger
+angela white
+lisa ann
+brandi love
+mia malkova
+eva elfie
+autumn falls
+violet myers
+valentina nappi
+adriana chechik
+gabbie carter
+rose monroe
+lela star
+alexis texas
+nicole aniston
+brandi bae
+kendra lust
+ariella ferrera
+julia ann
+cory chase
+india summer
+dani daniels
+riley steele
+tori black
+asa akira
+sasha grey
+jenna haze
+kayden kross
+stormy daniels
+jesse jane
+bonnie rotten
+sara jay
+diamond jackson
+phoenix marie
+jynx maze
+skin diamond
+katsuni
+madison ivy
+rachel starr
+nicolette shea
+autumn riley
+karlee grey
+gina valentina
+emily willis
+lena paul
+angela sommers
+kissa sins
+mia melano
+kali roses
+lauren phillips

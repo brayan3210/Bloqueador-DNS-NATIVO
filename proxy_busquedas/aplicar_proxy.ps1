@@ -19,8 +19,7 @@ if (-not (Test-Path $INSTALL)) {
 }
 
 Write-Host "Aplicando catalogo/excepciones y codigo a la copia protegida..." -ForegroundColor Cyan
-Copy-Item "$MOD\listas\catalogo_busqueda.txt"      "$INSTALL\listas\" -Force
-Copy-Item "$MOD\listas\excepciones_educativas.txt" "$INSTALL\listas\" -Force
+Copy-Item "$MOD\listas\*.txt" "$INSTALL\listas\" -Force
 Copy-Item "$MOD\motor_busqueda.py" "$INSTALL\motor_busqueda.py" -Force
 Copy-Item "$MOD\addon_proxy.py"    "$INSTALL\addon_proxy.py"    -Force
 Copy-Item "$MOD\iniciar_proxy.py"  "$INSTALL\iniciar_proxy.py"  -Force
