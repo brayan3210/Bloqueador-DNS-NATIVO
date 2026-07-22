@@ -6,7 +6,7 @@ generar_icono.py - Genera los recursos graficos del instalador (Pillow):
   - paypal.png      : icono minimalista de PayPal (doble P) para el boton donar
 """
 import os
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageDraw, ImageFont, ImageFilter
 
 BASE = os.path.dirname(os.path.abspath(__file__))
 SS = 4  # supersampling para bordes suaves
@@ -64,8 +64,39 @@ def _paypal(size):
     return img.resize((size, size), Image.LANCZOS)
 
 
-# HERO
-_shield(230, 250).save(os.path.join(BASE, "escudo_hero.png"))
+# HERO (escudo con glow azul suave + brillo de cristal)
+def _hero():
+    sw, sh = 220, 240
+    pad = 70
+    W, H = sw + pad * 2, sh + pad * 2
+    canvas = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+    shield = _shield(sw, sh)
+
+    # 1) glow: silueta azul del escudo, desenfocada
+    glow = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+    tint = Image.new("RGBA", (sw, sh), (46, 137, 255, 255))
+    tint.putalpha(shield.split()[3])
+    glow.paste(tint, (pad, pad), tint)
+    glow = glow.filter(ImageFilter.GaussianBlur(30))
+    glow.putalpha(glow.split()[3].point(lambda a: int(a * 0.55)))
+    canvas = Image.alpha_composite(canvas, glow)
+
+    # 2) escudo
+    canvas.alpha_composite(shield, (pad, pad))
+
+    # 3) brillo de cristal (elipse blanca tenue arriba, desenfocada)
+    shine = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+    sd = ImageDraw.Draw(shine)
+    sd.ellipse([pad + sw * 0.16, pad + sh * 0.06, pad + sw * 0.84, pad + sh * 0.42],
+               fill=(255, 255, 255, 60))
+    shine = shine.filter(ImageFilter.GaussianBlur(10))
+    # recortar el brillo a la silueta del escudo
+    mask = Image.new("L", (W, H), 0)
+    mask.paste(shield.split()[3], (pad, pad))
+    canvas = Image.composite(Image.alpha_composite(canvas, shine), canvas, mask)
+    return canvas
+
+_hero().save(os.path.join(BASE, "escudo_hero.png"))
 
 # ICONO (centrado en lienzo cuadrado)
 canvas = Image.new("RGBA", (256, 256), (0, 0, 0, 0))
@@ -77,4 +108,20 @@ canvas.save(os.path.join(BASE, "icono.ico"), format="ICO",
 # PAYPAL
 _paypal(44).save(os.path.join(BASE, "paypal.png"))
 
-print("OK: escudo_hero.png, icono.ico, paypal.png")
+
+# DECORACION tenue (escudo azul difuminado para la esquina inferior izquierda)
+def _deco():
+    W, H = 360, 300
+    canvas = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+    sh = _shield(170, 184)
+    tint = Image.new("RGBA", (170, 184), (40, 110, 210, 255))
+    tint.putalpha(sh.split()[3])
+    layer = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+    layer.paste(tint, (28, H - 200), tint)
+    layer = layer.filter(ImageFilter.GaussianBlur(9))
+    layer.putalpha(layer.split()[3].point(lambda a: int(a * 0.22)))
+    return Image.alpha_composite(canvas, layer)
+
+_deco().save(os.path.join(BASE, "deco.png"))
+
+print("OK: escudo_hero.png, icono.ico, paypal.png, deco.png")

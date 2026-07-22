@@ -19,7 +19,7 @@ $rootFiles = @("filtro.py","vigilante.py","actualizar_listas.py","configurar_pas
     "blindar_red.ps1","desinstalar.ps1","README.md","LICENSE")
 foreach ($f in $rootFiles) { if (Test-Path "$ROOT\$f") { Copy-Item "$ROOT\$f" $PAYLOAD -Force } }
 Copy-Item "$INST\TERMINOS.txt" $PAYLOAD -Force
-foreach ($img in @("icono.ico", "escudo_hero.png", "paypal.png")) {
+foreach ($img in @("icono.ico", "escudo_hero.png", "paypal.png", "deco.png")) {
     if (Test-Path "$INST\$img") { Copy-Item "$INST\$img" $PAYLOAD -Force }
 }
 
@@ -45,8 +45,8 @@ Write-Host ("   Listas empaquetadas: " + [math]::Round($grandes/1MB,1) + " MB")
 # Modulo de busquedas (sin certificado/logs/temporales)
 robocopy "$ROOT\proxy_busquedas" "$PAYLOAD\proxy_busquedas" /E /XD "mitmproxy" "logs" "__pycache__" /XF "*.pyc" ".parar_proxy" | Out-Null
 
-Write-Host "=== 2) Instalando PyInstaller (si falta) ===" -ForegroundColor Cyan
-& $python -m pip install --disable-pip-version-check --quiet pyinstaller
+Write-Host "=== 2) Instalando dependencias de build (PyInstaller + CustomTkinter) ===" -ForegroundColor Cyan
+& $python -m pip install --disable-pip-version-check --quiet pyinstaller customtkinter
 
 Write-Host "=== 3) Compilando el .exe ===" -ForegroundColor Cyan
 # PyInstaller escribe sus logs por stderr; que eso NO aborte el script.
@@ -56,6 +56,7 @@ $iconArg = if (Test-Path "$INST\icono.ico") { @("--icon", "$INST\icono.ico") } e
 & $python -m PyInstaller --noconfirm --onefile --windowed `
     --name "FiltroContenido-Setup" `
     --add-data "payload;payload" @iconArg `
+    --collect-all customtkinter `
     --distpath "$INST\dist" --workpath "$INST\build" --specpath "$INST" `
     "instalador.py"
 $rc = $LASTEXITCODE

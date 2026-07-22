@@ -2,16 +2,19 @@
 """
 instalador.py - Instalador GRAFICO del Filtro de Contenido (todo el proyecto PC).
 
-Se compila a un unico .exe con PyInstaller (ver construir_exe.ps1). Al ejecutarlo:
+Interfaz profesional (CustomTkinter) estilo Windows 11 / Fluent: ventana nativa
+con esquinas redondeadas, tema oscuro azul, dos columnas (stepper + panel).
+
+Al ejecutarlo:
   1. Se auto-eleva a administrador (UAC).
-  2. Asistente por pasos (estilo profesional): Bienvenido -> Terminos ->
-     Contrasena -> Componentes -> Instalacion -> Finalizacion.
+  2. Asistente por pasos: Bienvenido -> Terminos -> Ubicacion -> Componentes
+     (contrasena) -> Instalacion -> Finalizacion.
   3. Instala TODO: filtro DNS + blindaje de red + capa de busquedas (proxy).
 
 El .exe lleva DENTRO todo el proyecto (carpeta 'payload') y el instalador de
 Python 3.12.0; si el equipo no tiene Python, lo instala solo.
 
-Modo verificacion (no instala nada):   instalador.exe --check
+Modos de prueba (no instalan nada):  --check   |   --gui-selftest
 """
 
 import ctypes
@@ -59,30 +62,6 @@ def hash_password(texto):
 
 def hay_python():
     return shutil.which("python") or shutil.which("py")
-
-
-# --------------------------------------------------------------------------
-# Verificacion (para pruebas): instalador.exe --check
-# --------------------------------------------------------------------------
-def modo_check():
-    base = base_payload()
-    req = [
-        os.path.join(base, "filtro.py"),
-        os.path.join(base, "instalar.ps1"),
-        os.path.join(base, "config.example.json"),
-        os.path.join(base, "proxy_busquedas", "instalar_proxy.ps1"),
-        os.path.join(base, "proxy_busquedas", "motor_busqueda.py"),
-    ]
-    print("payload:", base)
-    ok = True
-    for r in req:
-        existe = os.path.exists(r)
-        ok = ok and existe
-        print(("  OK " if existe else "  FALTA "), os.path.relpath(r, base))
-    pyi = os.path.join(base, PY_INSTALLER)
-    print(("  OK " if os.path.exists(pyi) else "  (sin)"), PY_INSTALLER, "(Python embebido)")
-    print("RESULTADO:", "TODO PRESENTE" if ok else "FALTAN ARCHIVOS")
-    return 0 if ok else 1
 
 
 # --------------------------------------------------------------------------
@@ -138,6 +117,30 @@ def instalar_python(base, log):
 
 
 # --------------------------------------------------------------------------
+# Verificacion (para pruebas): instalador.exe --check
+# --------------------------------------------------------------------------
+def modo_check():
+    base = base_payload()
+    req = [
+        os.path.join(base, "filtro.py"),
+        os.path.join(base, "instalar.ps1"),
+        os.path.join(base, "config.example.json"),
+        os.path.join(base, "proxy_busquedas", "instalar_proxy.ps1"),
+        os.path.join(base, "proxy_busquedas", "motor_busqueda.py"),
+    ]
+    print("payload:", base)
+    ok = True
+    for r in req:
+        existe = os.path.exists(r)
+        ok = ok and existe
+        print(("  OK " if existe else "  FALTA "), os.path.relpath(r, base))
+    pyi = os.path.join(base, PY_INSTALLER)
+    print(("  OK " if os.path.exists(pyi) else "  (sin)"), PY_INSTALLER, "(Python embebido)")
+    print("RESULTADO:", "TODO PRESENTE" if ok else "FALTAN ARCHIVOS")
+    return 0 if ok else 1
+
+
+# --------------------------------------------------------------------------
 # Ejecucion de la instalacion (ya elevado)
 # --------------------------------------------------------------------------
 def ejecutar_instalacion(password, log):
@@ -184,12 +187,10 @@ def ejecutar_instalacion(password, log):
             continue
         log(f"Instalando: {desc} ...")
         try:
-            # Ya estamos elevados: los .ps1 detectan admin y no re-piden UAC.
             r = subprocess.run(
                 [ps, "-ExecutionPolicy", "Bypass", "-NoProfile", "-File", ruta],
                 cwd=base, input="\n", capture_output=True, text=True, timeout=1200)
-            cola = (r.stdout or "").strip().splitlines()[-3:]
-            for ln in cola:
+            for ln in (r.stdout or "").strip().splitlines()[-3:]:
                 log("   " + ln)
             if r.returncode != 0:
                 log(f"   (aviso: {desc} devolvio codigo {r.returncode})")
@@ -202,26 +203,32 @@ def ejecutar_instalacion(password, log):
 
 
 # --------------------------------------------------------------------------
-# Interfaz grafica: asistente profesional (ventana sin borde + rail de pasos)
+# Interfaz grafica (CustomTkinter) — estilo Windows 11 / Fluent
 # --------------------------------------------------------------------------
 def gui():
     import queue
     import threading
     import tkinter as tk
     import webbrowser
-    from tkinter import messagebox, scrolledtext, ttk
 
-    # --- Paleta (oscuro azul) y tipografia ---
-    BG = "#0a0e17"; SIDE = "#0c1120"; CARD = "#121826"; CARD2 = "#161d2e"
-    LINE = "#212a3d"; BLUE = "#2f7ff0"; BLUE_D = "#2569d0"; BLUE_LT = "#4a9eff"
-    TXT = "#eef2f8"; MUT = "#8b95a7"; FAINT = "#5b6577"; GREEN = "#3ecf8e"
-    UI = "Segoe UI"; MDL2 = "Segoe MDL2 Assets"; MONO = "Consolas"
-    # Glifos de Segoe MDL2 Assets (viene con Windows 10/11)
-    G_SHIELD = ""; G_HOME = ""; G_PAGE = ""; G_LOCK = ""
-    G_GRID = ""; G_DOWN = ""; G_CHECK = ""; G_SEARCH = ""
-    G_GLOBE = ""; G_MIN = ""; G_CLOSE = ""
+    import customtkinter as ctk
+    from PIL import Image
+
+    # ---- Paleta (spec del usuario) ----
+    C_LEFT = "#07111E"; C_RIGHT = "#101A2A"; C_MID = "#0D1726"
+    C_CARD = "#111E31"; C_HOVER = "#18263D"; C_TXT = "#FFFFFF"; C_SEC = "#AEB8C7"
+    C_FAINT = "#7E8796"; C_BLUE = "#2E89FF"; C_BLUE2 = "#4BA3FF"; C_BORDER = "#1F2C42"
+    C_INPUT = "#0C1728"
+
+    # ---- Glifos Segoe MDL2 Assets (por codepoint = ASCII puro) ----
+    G_SHIELD = chr(0xEA18); G_HOME = chr(0xE80F); G_PAGE = chr(0xE7C3)
+    G_FOLDER = chr(0xE8B7); G_GRID = chr(0xE71D); G_DOWN = chr(0xE896)
+    G_CHECK = chr(0xE73E); G_LOCK = chr(0xE72E); G_SEARCH = chr(0xE721)
+    G_GLOBE = chr(0xE774); G_CHEVDOWN = chr(0xE70D)
+
     GITHUB = "https://github.com/brayan3210"
     PAYPAL = "https://www.paypal.com/donate/?hosted_button_id=ANE8JAX7MG5FE"
+    INSTALL_DIR = r"C:\ProgramData\FiltroContenido"
 
     base = base_payload()
 
@@ -241,293 +248,290 @@ def gui():
         except Exception:
             pass
 
-    root = tk.Tk()
+    ctk.set_appearance_mode("dark")
+    root = ctk.CTk()
     root.title(APP_TITLE)
-    root.configure(bg=BG)
-    root.overrideredirect(True)
-    W, H = 960, 620
-    sx = (root.winfo_screenwidth() - W) // 2
-    sy = max(0, (root.winfo_screenheight() - H) // 3)
-    root.geometry(f"{W}x{H}+{sx}+{sy}")
-    ic = asset("icono.ico")
-    if ic:
-        try: root.iconbitmap(ic)
+    root.configure(fg_color=C_RIGHT)
+    sw, sh = root.winfo_screenwidth(), root.winfo_screenheight()
+    W = max(1100, min(1480, sw - 120)); H = max(720, min(920, sh - 120))
+    root.geometry(f"{W}x{H}+{(sw - W) // 2}+{max(0, (sh - H) // 3)}")
+    root.minsize(1080, 700)
+    ico = asset("icono.ico")
+    if ico:
+        try: root.iconbitmap(ico)
         except Exception: pass
 
-    imgs = {}
-    def load_img(name):
+    def F(sz, w="normal"): return ctk.CTkFont("Segoe UI", sz, w)
+    def FM(sz): return ctk.CTkFont("Segoe MDL2 Assets", sz)
+
+    def cimg(name, size):
         p = asset(name)
         if not p:
             return None
         try:
-            im = tk.PhotoImage(file=p); imgs[name] = im; return im
+            return ctk.CTkImage(Image.open(p), size=size)
         except Exception:
             return None
-    hero_img = load_img("escudo_hero.png")
-    pp_img = load_img("paypal.png")
+    hero_ck = cimg("escudo_hero.png", (172, 182))
+    hero_sm = cimg("escudo_hero.png", (128, 135))
+    pp_ck = cimg("paypal.png", (18, 18))
+    deco_ck = cimg("deco.png", (320, 266))
 
-    style = ttk.Style()
-    try: style.theme_use("clam")
-    except Exception: pass
-    style.configure("Blue.Horizontal.TProgressbar", troughcolor=CARD2,
-                    bordercolor=CARD2, background=BLUE, lightcolor=BLUE, darkcolor=BLUE)
+    root.grid_columnconfigure(0, weight=0)
+    root.grid_columnconfigure(1, weight=1)
+    root.grid_rowconfigure(0, weight=1)
 
-    def warn(m):
-        messagebox.showwarning(APP_TITLE, m)
+    # ============================ PANEL IZQUIERDO ============================
+    left = ctk.CTkFrame(root, width=370, corner_radius=0, fg_color=C_LEFT)
+    left.grid(row=0, column=0, sticky="nsew"); left.grid_propagate(False)
 
-    def boton(parent, text, cmd, primary=True):
-        base_bg = BLUE if primary else CARD2
-        hov = BLUE_D if primary else LINE
-        fg = "#ffffff" if primary else TXT
-        b = tk.Button(parent, text=text, command=cmd, relief="flat", bd=0, cursor="hand2",
-                      font=(UI, 10, "bold"), padx=22, pady=8, bg=base_bg, fg=fg,
-                      activebackground=hov, activeforeground=fg,
-                      highlightthickness=(0 if primary else 1), highlightbackground=LINE)
-        b.bind("<Enter>", lambda e: b["state"] == "normal" and b.configure(bg=hov))
-        b.bind("<Leave>", lambda e: b["state"] == "normal" and b.configure(bg=base_bg))
-        return b
+    if deco_ck:  # decoracion tenue al fondo
+        deco_lbl = ctk.CTkLabel(left, text="", image=deco_ck, fg_color="transparent")
+        deco_lbl.place(relx=0.0, rely=1.0, anchor="sw")
+        deco_lbl.lower()
 
-    def clickable(parent, text, fn, fg=BLUE_LT, font=(UI, 9)):
-        lb = tk.Label(parent, text=text, bg=parent["bg"], fg=fg, font=font, cursor="hand2")
-        lb.bind("<Button-1>", lambda e: fn())
-        return lb
+    brand = ctk.CTkFrame(left, fg_color="transparent")
+    brand.pack(fill="x", padx=32, pady=(34, 0))
+    ctk.CTkLabel(brand, text=G_SHIELD, font=FM(30), text_color=C_BLUE).pack(side="left")
+    bt = ctk.CTkFrame(brand, fg_color="transparent"); bt.pack(side="left", padx=(12, 0))
+    ctk.CTkLabel(bt, text="Filtro de Contenido", font=F(17, "bold"), text_color=C_TXT).pack(anchor="w")
+    ctk.CTkLabel(bt, text="Versión 1.0", font=F(11), text_color=C_FAINT).pack(anchor="w")
 
-    # ---- mover / minimizar / cerrar (ventana sin borde) ----
-    def start_move(e): root._mx, root._my = e.x, e.y
-    def do_move(e): root.geometry(f"+{e.x_root - root._mx}+{e.y_root - root._my}")
-    def on_map(e): root.overrideredirect(True)
-    root.bind("<Map>", on_map)
-
-    def minimizar():
-        root.overrideredirect(False)
-        root.iconify()
-
-    def cerrar():
-        if state["installing"]:
-            return
-        root.destroy()
-
-    # ===================== SIDEBAR =====================
-    side = tk.Frame(root, bg=SIDE, width=250)
-    side.pack(side="left", fill="y"); side.pack_propagate(False)
-
-    brand = tk.Frame(side, bg=SIDE); brand.pack(fill="x", padx=22, pady=(24, 6))
-    tk.Label(brand, text="", bg=SIDE, fg=BLUE, font=(MDL2, 26)).pack(side="left")
-    bt = tk.Frame(brand, bg=SIDE); bt.pack(side="left", padx=(10, 0))
-    tk.Label(bt, text="Filtro de Contenido", bg=SIDE, fg=TXT, font=(UI, 12, "bold")).pack(anchor="w")
-    tk.Label(bt, text="Versión 1.0", bg=SIDE, fg=MUT, font=(UI, 8)).pack(anchor="w")
-    for w in (brand, bt):
-        w.bind("<Button-1>", start_move); w.bind("<B1-Motion>", do_move)
-
-    STEP_DEFS = [
-        ("Bienvenido", "Descripción general", ""),
-        ("Términos de uso", "Acuerdo de licencia", ""),
-        ("Contraseña", "Clave de protección", ""),
-        ("Componentes", "Qué se instalará", ""),
-        ("Instalación", "Instalando el programa", ""),
-        ("Finalización", "Instalación completada", ""),
+    STEPS = [
+        ("Bienvenido", "Descripción general", G_HOME),
+        ("Términos de uso", "Acuerdo de licencia", G_PAGE),
+        ("Ubicación", "Carpeta de instalación", G_FOLDER),
+        ("Componentes", "Opciones de instalación", G_GRID),
+        ("Instalación", "Instalando el programa", G_DOWN),
+        ("Finalización", "Instalación completada", G_CHECK),
     ]
-    railc = tk.Canvas(side, bg=SIDE, highlightthickness=0, width=250, height=384)
-    railc.pack(fill="x", pady=(16, 0))
-    stepitems = []
-    for i, (t, s, g) in enumerate(STEP_DEFS):
-        cy = 26 + i * 62
-        if i < len(STEP_DEFS) - 1:
-            railc.create_line(42, cy + 17, 42, cy + 45, fill=LINE, dash=(2, 3))
-        circ = railc.create_oval(27, cy - 15, 57, cy + 15, outline=LINE, width=2, fill=SIDE)
-        gl = railc.create_text(42, cy, text=g, font=(MDL2, 12), fill=MUT)
-        ti = railc.create_text(72, cy - 8, text=t, font=(UI, 10, "bold"), fill=MUT, anchor="w")
-        su = railc.create_text(72, cy + 9, text=s, font=(UI, 8), fill=FAINT, anchor="w")
-        stepitems.append((circ, gl, ti, su, g))
+    steps_c = tk.Canvas(left, bg=C_LEFT, highlightthickness=0, width=370)
+    steps_c.pack(fill="both", expand=True, padx=0, pady=(46, 0))
+    step_items = []
+    for i, (t, s, g) in enumerate(STEPS):
+        cy = 40 + i * 74
+        cx = 52
+        if i < len(STEPS) - 1:
+            steps_c.create_line(cx, cy + 22, cx, cy + 52, fill=C_BORDER, dash=(2, 4))
+        glow = steps_c.create_oval(cx - 26, cy - 26, cx + 26, cy + 26, outline="", fill=C_LEFT)
+        circ = steps_c.create_oval(cx - 19, cy - 19, cx + 19, cy + 19, outline=C_BORDER, width=2, fill=C_MID)
+        gl = steps_c.create_text(cx, cy, text=g, font=("Segoe MDL2 Assets", 14), fill=C_FAINT)
+        ti = steps_c.create_text(cx + 40, cy - 9, text=t, font=("Segoe UI", 11, "bold"), fill=C_SEC, anchor="w")
+        su = steps_c.create_text(cx + 40, cy + 9, text=s, font=("Segoe UI", 8), fill=C_FAINT, anchor="w")
+        step_items.append((glow, circ, gl, ti, su, g))
 
     def paint_steps(active):
-        for i, (circ, gl, ti, su, g) in enumerate(stepitems):
-            if i < active:
-                railc.itemconfig(circ, outline=BLUE, fill=BLUE)
-                railc.itemconfig(gl, text="", fill="#ffffff")
-                railc.itemconfig(ti, fill=MUT); railc.itemconfig(su, fill=FAINT)
-            elif i == active:
-                railc.itemconfig(circ, outline=BLUE, fill=BLUE)
-                railc.itemconfig(gl, text=g, fill="#ffffff")
-                railc.itemconfig(ti, fill=TXT); railc.itemconfig(su, fill=MUT)
-            else:
-                railc.itemconfig(circ, outline=LINE, fill=SIDE)
-                railc.itemconfig(gl, text=g, fill=MUT)
-                railc.itemconfig(ti, fill=MUT); railc.itemconfig(su, fill=FAINT)
+        for i, (glow, circ, gl, ti, su, g) in enumerate(step_items):
+            if i < active:      # completado
+                steps_c.itemconfig(glow, fill=C_LEFT)
+                steps_c.itemconfig(circ, outline=C_BLUE, fill="#123256")
+                steps_c.itemconfig(gl, text=G_CHECK, fill=C_BLUE2)
+                steps_c.itemconfig(ti, fill=C_SEC); steps_c.itemconfig(su, fill=C_FAINT)
+            elif i == active:   # activo (glow azul)
+                steps_c.itemconfig(glow, fill="#0f2440")
+                steps_c.itemconfig(circ, outline=C_BLUE2, fill=C_BLUE)
+                steps_c.itemconfig(gl, text=g, fill="#ffffff")
+                steps_c.itemconfig(ti, fill=C_TXT); steps_c.itemconfig(su, fill=C_SEC)
+            else:               # pendiente
+                steps_c.itemconfig(glow, fill=C_LEFT)
+                steps_c.itemconfig(circ, outline=C_BORDER, fill=C_MID)
+                steps_c.itemconfig(gl, text=g, fill=C_FAINT)
+                steps_c.itemconfig(ti, fill=C_SEC); steps_c.itemconfig(su, fill=C_FAINT)
 
-    # footer: desarrollador + github + paypal
-    foot = tk.Frame(side, bg=SIDE); foot.pack(side="bottom", fill="x", padx=22, pady=16)
-    tk.Frame(foot, bg=LINE, height=1).pack(fill="x", pady=(0, 10))
-    tk.Label(foot, text="Brayan Cortés", bg=SIDE, fg=TXT, font=(UI, 9, "bold")).pack(anchor="w")
-    tk.Label(foot, text="Desarrollador Fullstack", bg=SIDE, fg=MUT, font=(UI, 8)).pack(anchor="w", pady=(0, 8))
-    frow = tk.Frame(foot, bg=SIDE); frow.pack(fill="x")
-    gh = clickable(frow, "GitHub  ↗", lambda: webbrowser.open(GITHUB), fg=BLUE_LT, font=(UI, 9, "bold"))
-    gh.pack(side="left")
-    donar = tk.Button(frow, image=pp_img, text=" Donar", compound="left",
-                      bg=CARD2, fg=TXT, relief="flat", bd=0, cursor="hand2",
-                      font=(UI, 9, "bold"), padx=10, pady=4,
-                      activebackground=LINE, activeforeground=TXT,
-                      command=lambda: webbrowser.open(PAYPAL))
-    donar.pack(side="right")
-    donar.bind("<Enter>", lambda e: donar.configure(bg=LINE))
-    donar.bind("<Leave>", lambda e: donar.configure(bg=CARD2))
+    # footer izquierdo: desarrollador + github + paypal
+    foot = ctk.CTkFrame(left, fg_color="transparent")
+    foot.pack(side="bottom", fill="x", padx=32, pady=22)
+    ctk.CTkFrame(foot, height=1, fg_color=C_BORDER).pack(fill="x", pady=(0, 12))
+    ctk.CTkLabel(foot, text="Brayan Cortés", font=F(12, "bold"), text_color=C_TXT).pack(anchor="w")
+    ctk.CTkLabel(foot, text="Desarrollador Fullstack", font=F(10), text_color=C_SEC).pack(anchor="w", pady=(0, 10))
+    frow = ctk.CTkFrame(foot, fg_color="transparent"); frow.pack(fill="x")
+    gh = ctk.CTkLabel(frow, text="GitHub  ↗", font=F(10, "bold"), text_color=C_BLUE2, cursor="hand2")
+    gh.pack(side="left"); gh.bind("<Button-1>", lambda e: webbrowser.open(GITHUB))
+    ctk.CTkButton(frow, text="  Donar", image=pp_ck, compound="left", width=90, height=30,
+                  corner_radius=10, font=F(10, "bold"), fg_color=C_CARD, hover_color=C_HOVER,
+                  text_color=C_TXT, command=lambda: webbrowser.open(PAYPAL)).pack(side="right")
 
-    # ===================== ZONA PRINCIPAL =====================
-    mainf = tk.Frame(root, bg=BG); mainf.pack(side="left", fill="both", expand=True)
+    # ============================ PANEL DERECHO ============================
+    right = ctk.CTkFrame(root, corner_radius=0, fg_color=C_RIGHT)
+    right.grid(row=0, column=1, sticky="nsew")
+    right.grid_rowconfigure(1, weight=1)
+    right.grid_columnconfigure(0, weight=1)
 
-    ctrl = tk.Frame(mainf, bg=BG); ctrl.place(relx=1.0, x=-4, y=6, anchor="ne")
-    def ctrl_btn(glyph, cmd, hov):
-        lb = tk.Label(ctrl, text=glyph, bg=BG, fg=MUT, font=(MDL2, 10), cursor="hand2", padx=10, pady=5)
-        lb.pack(side="left")
-        lb.bind("<Button-1>", lambda e: cmd())
-        lb.bind("<Enter>", lambda e: lb.configure(bg=hov, fg="#ffffff"))
-        lb.bind("<Leave>", lambda e: lb.configure(bg=BG, fg=MUT))
-        return lb
-    ctrl_btn("", minimizar, "#1a2130")
-    ctrl_btn("", cerrar, "#c0392b")
-
-    head = tk.Frame(mainf, bg=BG); head.pack(fill="x", padx=44, pady=(30, 0))
-    htitle = tk.Frame(head, bg=BG); htitle.pack(anchor="w")
-    t_sub = tk.StringVar()
-    tk.Label(head, textvariable=t_sub, bg=BG, fg=MUT, font=(UI, 10)).pack(anchor="w", pady=(4, 0))
-    for w in (head,):
-        w.bind("<Button-1>", start_move); w.bind("<B1-Motion>", do_move)
+    # -- header (titulo + subtitulo + escudo) --
+    header = ctk.CTkFrame(right, fg_color="transparent")
+    header.grid(row=0, column=0, sticky="ew", padx=48, pady=(42, 0))
+    header.grid_columnconfigure(0, weight=1)
+    htitle = ctk.CTkFrame(header, fg_color="transparent"); htitle.grid(row=0, column=0, sticky="w")
+    sub_lbl = ctk.CTkLabel(header, text="", font=F(13), text_color=C_SEC, justify="left")
+    sub_lbl.grid(row=1, column=0, sticky="w", pady=(10, 0))
+    hero_lbl = ctk.CTkLabel(header, text="", image=hero_ck)
+    hero_lbl.grid(row=0, column=1, rowspan=2, sticky="e", padx=(24, 0))
 
     def set_title(parts):
         for w in htitle.winfo_children():
             w.destroy()
         for txt, col in parts:
-            tk.Label(htitle, text=txt, bg=BG, fg=col, font=(UI, 22, "bold")).pack(side="left")
+            ctk.CTkLabel(htitle, text=txt, font=F(30, "bold"), text_color=col).pack(side="left")
 
-    tk.Frame(mainf, bg=LINE, height=1).pack(fill="x", padx=44, pady=(16, 0))
-    body = tk.Frame(mainf, bg=BG); body.pack(fill="both", expand=True, padx=44, pady=(18, 6))
+    # -- contenedor de contenido (cambia por paso) --
+    content = ctk.CTkFrame(right, fg_color="transparent")
+    content.grid(row=1, column=0, sticky="nsew", padx=48, pady=(26, 0))
 
-    hero_lbl = tk.Label(mainf, image=hero_img, bg=BG) if hero_img else None
+    def card(parent):
+        return ctk.CTkFrame(parent, fg_color=C_CARD, corner_radius=18,
+                            border_width=1, border_color=C_BORDER)
 
-    def icon_circle(parent, glyph, size=46, fg=BLUE_LT, bg=CARD):
-        c = tk.Canvas(parent, width=size, height=size, bg=bg, highlightthickness=0)
-        c.create_oval(3, 3, size - 3, size - 3, fill=CARD2, outline="")
-        c.create_text(size // 2, size // 2, text=glyph, font=(MDL2, int(size * 0.33)), fill=fg)
-        return c
+    def feature_row(parent, glyph, title, desc):
+        r = ctk.CTkFrame(parent, fg_color="transparent")
+        r.pack(fill="x", padx=26, pady=15)
+        circ = ctk.CTkFrame(r, width=52, height=52, corner_radius=26, fg_color=C_MID)
+        circ.pack(side="left"); circ.pack_propagate(False)
+        ctk.CTkLabel(circ, text=glyph, font=FM(20), text_color=C_BLUE2).place(relx=0.5, rely=0.5, anchor="center")
+        tf = ctk.CTkFrame(r, fg_color="transparent"); tf.pack(side="left", fill="x", expand=True, padx=(18, 0))
+        ctk.CTkLabel(tf, text=title, font=F(14, "bold"), text_color=C_TXT, anchor="w").pack(anchor="w")
+        ctk.CTkLabel(tf, text=desc, font=F(11), text_color=C_SEC, anchor="w", justify="left",
+                     wraplength=560).pack(anchor="w", pady=(3, 0))
 
-    # ---- Pagina 0: Bienvenido ----
-    pg0 = tk.Frame(body, bg=BG)
-    fcard = tk.Frame(pg0, bg=CARD, highlightthickness=1, highlightbackground=LINE)
-    fcard.pack(fill="x")
-    feats = [
-        ("", "Filtro de contenido avanzado", "Bloquea material pornográfico en tu equipo y mantiene una navegación segura."),
-        ("", "Protección en tiempo real", "Filtra búsquedas y sitios web no deseados en todos tus navegadores."),
-        ("", "Privacidad y seguridad", "Todo el filtrado ocurre en tu equipo. No recopilamos tus datos."),
-    ]
-    for idx, (g, t, d) in enumerate(feats):
-        r = tk.Frame(fcard, bg=CARD); r.pack(fill="x", padx=20, pady=13)
-        icon_circle(r, g).pack(side="left")
-        tf = tk.Frame(r, bg=CARD); tf.pack(side="left", fill="x", expand=True, padx=(16, 0))
-        tk.Label(tf, text=t, bg=CARD, fg=TXT, font=(UI, 11, "bold"), anchor="w").pack(anchor="w")
-        tk.Label(tf, text=d, bg=CARD, fg=MUT, font=(UI, 9), anchor="w", justify="left", wraplength=520).pack(anchor="w")
-        if idx < len(feats) - 1:
-            tk.Frame(fcard, bg=LINE, height=1).pack(fill="x", padx=20)
-    tline = tk.Frame(pg0, bg=BG); tline.pack(fill="x", pady=(16, 0))
-    tk.Label(tline, text="", bg=BG, fg=BLUE, font=(MDL2, 10)).pack(side="left")
-    tk.Label(tline, text="  Al continuar, aceptas los", bg=BG, fg=MUT, font=(UI, 9)).pack(side="left")
-    clickable(tline, " Términos de uso", lambda: go(1)).pack(side="left")
-    tk.Label(tline, text="y la", bg=BG, fg=MUT, font=(UI, 9)).pack(side="left", padx=(4, 0))
-    clickable(tline, "Política de privacidad.", lambda: go(1)).pack(side="left", padx=(4, 0))
+    # ----- Pagina 0: Bienvenido -----
+    pg0 = ctk.CTkFrame(content, fg_color="transparent")
+    fcard = card(pg0); fcard.pack(fill="x")
+    feature_row(fcard, G_SEARCH, "Filtro de contenido avanzado",
+                "Bloquea material pornográfico en tu equipo y mantiene una navegación segura.")
+    ctk.CTkFrame(fcard, height=1, fg_color=C_BORDER).pack(fill="x", padx=26)
+    feature_row(fcard, G_SHIELD, "Protección en tiempo real",
+                "Filtra búsquedas y sitios web no deseados en todos tus navegadores.")
+    ctk.CTkFrame(fcard, height=1, fg_color=C_BORDER).pack(fill="x", padx=26)
+    feature_row(fcard, G_LOCK, "Privacidad y seguridad",
+                "No recopilamos tus datos. Todo el filtrado ocurre en tu equipo.")
+    tline = ctk.CTkFrame(pg0, fg_color="transparent"); tline.pack(fill="x", pady=(22, 0))
+    ctk.CTkLabel(tline, text=G_SHIELD, font=FM(13), text_color=C_BLUE).pack(side="left")
+    ctk.CTkLabel(tline, text="  Al continuar, aceptas los", font=F(11), text_color=C_SEC).pack(side="left")
+    for tx in (" Términos de uso", " y la ", "Política de privacidad."):
+        es_link = tx.strip() in ("Términos de uso", "Política de privacidad.")
+        lb = ctk.CTkLabel(tline, text=tx, font=F(11, "bold" if es_link else "normal"),
+                          text_color=(C_BLUE2 if es_link else C_SEC))
+        lb.pack(side="left")
+        if es_link:
+            lb.configure(cursor="hand2"); lb.bind("<Button-1>", lambda e: go(1))
 
-    # ---- Pagina 1: Terminos ----
-    pg1 = tk.Frame(body, bg=BG)
-    tbox = scrolledtext.ScrolledText(pg1, wrap="word", bg=CARD, fg=TXT, relief="flat",
-                                     font=(MONO, 9), padx=16, pady=14, bd=0,
-                                     highlightthickness=1, highlightbackground=LINE, highlightcolor=LINE)
+    # ----- Pagina 1: Terminos -----
+    pg1 = ctk.CTkFrame(content, fg_color="transparent")
+    tbox = ctk.CTkTextbox(pg1, fg_color=C_CARD, border_color=C_BORDER, border_width=1,
+                          corner_radius=16, font=("Consolas", 12), text_color=C_SEC, wrap="word")
     tbox.pack(fill="both", expand=True)
     tbox.insert("1.0", terminos); tbox.configure(state="disabled")
-    acepta = tk.BooleanVar(value=False)
-    tk.Checkbutton(pg1, text="  He leído y acepto los términos", variable=acepta,
-                   bg=BG, fg=TXT, selectcolor=CARD2, activebackground=BG, activeforeground=BLUE_LT,
-                   font=(UI, 10), anchor="w", bd=0, highlightthickness=0).pack(fill="x", pady=(14, 0))
+    acepta = ctk.BooleanVar(value=False)
+    ctk.CTkCheckBox(pg1, text="  He leído y acepto los términos", variable=acepta,
+                    font=F(12), text_color=C_TXT, fg_color=C_BLUE, hover_color=C_BLUE2,
+                    border_color=C_BORDER, corner_radius=6).pack(anchor="w", pady=(16, 0))
 
-    # ---- Pagina 2: Contrasena ----
-    pg2 = tk.Frame(body, bg=BG)
-    pcard = tk.Frame(pg2, bg=CARD, highlightthickness=1, highlightbackground=LINE); pcard.pack(fill="x")
-    pin = tk.Frame(pcard, bg=CARD); pin.pack(fill="x", padx=26, pady=22)
+    # ----- Pagina 2: Ubicacion -----
+    pg2 = ctk.CTkFrame(content, fg_color="transparent")
+    ucard = card(pg2); ucard.pack(fill="x")
+    ur = ctk.CTkFrame(ucard, fg_color="transparent"); ur.pack(fill="x", padx=26, pady=22)
+    ucirc = ctk.CTkFrame(ur, width=52, height=52, corner_radius=26, fg_color=C_MID)
+    ucirc.pack(side="left"); ucirc.pack_propagate(False)
+    ctk.CTkLabel(ucirc, text=G_FOLDER, font=FM(20), text_color=C_BLUE2).place(relx=0.5, rely=0.5, anchor="center")
+    uf = ctk.CTkFrame(ur, fg_color="transparent"); uf.pack(side="left", fill="x", expand=True, padx=(18, 0))
+    ctk.CTkLabel(uf, text="Carpeta de instalación", font=F(14, "bold"), text_color=C_TXT, anchor="w").pack(anchor="w")
+    ctk.CTkLabel(uf, text=INSTALL_DIR, font=("Consolas", 12), text_color=C_BLUE2, anchor="w").pack(anchor="w", pady=(4, 0))
+    ctk.CTkLabel(pg2, text="Se instala en una carpeta protegida del sistema (oculta y sin permiso de\n"
+                          "borrado para el usuario normal). La ubicación es fija para blindar el filtro.",
+                 font=F(11), text_color=C_SEC, justify="left").pack(anchor="w", pady=(18, 0))
 
-    def campo(parent, label):
-        tk.Label(parent, text=label, bg=CARD, fg=MUT, font=(UI, 10)).pack(anchor="w", pady=(6, 3))
-        e = tk.Entry(parent, show="●", bg=CARD2, fg=TXT, insertbackground=BLUE, relief="flat", font=(UI, 12))
-        e.pack(fill="x", ipady=8)
-        return e
-
-    e1 = campo(pin, "Contraseña (mínimo 8 caracteres)")
-    e2 = campo(pin, "Confirmar contraseña")
-    tips = tk.Frame(pg2, bg=BG); tips.pack(fill="x", pady=(16, 0))
-    for line in ["Solo se guarda su huella (SHA-256); el texto nunca se almacena.",
-                 "Consejo: que la escriba un familiar de confianza y no te la diga,",
-                 "o que la genere una IA, la pegues aquí y luego borres ese chat.",
-                 "Con ella podrás desactivar el filtro en el futuro."]:
-        tk.Label(tips, text="•  " + line, bg=BG, fg=MUT, font=(UI, 9), anchor="w").pack(anchor="w", pady=1)
-
-    # ---- Pagina 3: Componentes ----
-    pg3 = tk.Frame(body, bg=BG)
-    ccard = tk.Frame(pg3, bg=CARD, highlightthickness=1, highlightbackground=LINE); ccard.pack(fill="x")
+    # ----- Pagina 3: Componentes + contrasena -----
+    pg3 = ctk.CTkFrame(content, fg_color="transparent")
+    ccard = card(pg3); ccard.pack(fill="x")
     comps = [
         ("Filtro DNS", "Bloquea ~260.000 dominios porno en cualquier red."),
         ("Capa de búsquedas", "Filtra lo que escribes en Google/Bing/YouTube, sin SafeSearch."),
-        ("Blindaje de red", "Fuerza el DNS al filtro (NRPT) y desactiva DNS-over-HTTPS."),
-        ("Python 3.12", "Se instala solo si tu equipo aún no lo tiene."),
-        ("Protección y arranque", "Candado por contraseña y arranque automático con Windows."),
+        ("Blindaje de red + Python 3.12", "Fuerza el DNS al filtro; instala Python si falta."),
     ]
     for idx, (t, d) in enumerate(comps):
-        r = tk.Frame(ccard, bg=CARD); r.pack(fill="x", padx=22, pady=10)
-        tk.Label(r, text="", bg=CARD, fg=GREEN, font=(MDL2, 13)).pack(side="left")
-        tf = tk.Frame(r, bg=CARD); tf.pack(side="left", fill="x", expand=True, padx=(14, 0))
-        tk.Label(tf, text=t, bg=CARD, fg=TXT, font=(UI, 11, "bold"), anchor="w").pack(anchor="w")
-        tk.Label(tf, text=d, bg=CARD, fg=MUT, font=(UI, 9), anchor="w", justify="left", wraplength=520).pack(anchor="w")
+        r = ctk.CTkFrame(ccard, fg_color="transparent"); r.pack(fill="x", padx=26, pady=12)
+        ctk.CTkLabel(r, text=G_CHECK, font=FM(15), text_color="#3ECF8E").pack(side="left")
+        tf = ctk.CTkFrame(r, fg_color="transparent"); tf.pack(side="left", fill="x", expand=True, padx=(14, 0))
+        ctk.CTkLabel(tf, text=t, font=F(13, "bold"), text_color=C_TXT, anchor="w").pack(anchor="w")
+        ctk.CTkLabel(tf, text=d, font=F(11), text_color=C_SEC, anchor="w", justify="left", wraplength=540).pack(anchor="w")
         if idx < len(comps) - 1:
-            tk.Frame(ccard, bg=LINE, height=1).pack(fill="x", padx=22)
+            ctk.CTkFrame(ccard, height=1, fg_color=C_BORDER).pack(fill="x", padx=26)
+    pwd_wrap = ctk.CTkFrame(pg3, fg_color="transparent"); pwd_wrap.pack(fill="x", pady=(16, 0))
+    ctk.CTkLabel(pwd_wrap, text="Clave de protección  (mínimo 8 caracteres)", font=F(11), text_color=C_SEC).pack(anchor="w")
+    prow = ctk.CTkFrame(pwd_wrap, fg_color="transparent"); prow.pack(fill="x", pady=(6, 0))
+    e1 = ctk.CTkEntry(prow, show="●", height=40, corner_radius=10, fg_color=C_INPUT,
+                      border_color=C_BORDER, font=F(12), placeholder_text="Contraseña")
+    e1.pack(side="left", fill="x", expand=True, padx=(0, 8))
+    e2 = ctk.CTkEntry(prow, show="●", height=40, corner_radius=10, fg_color=C_INPUT,
+                      border_color=C_BORDER, font=F(12), placeholder_text="Confirmar")
+    e2.pack(side="left", fill="x", expand=True)
+    ctk.CTkLabel(pg3, text="Que la escriba un familiar de confianza o una IA y luego borres el chat. "
+                          "Solo se guarda su huella (SHA-256).",
+                 font=F(10), text_color=C_FAINT, justify="left", wraplength=640).pack(anchor="w", pady=(8, 0))
 
-    # ---- Pagina 4: Instalacion ----
-    pg4 = tk.Frame(body, bg=BG)
-    prog = ttk.Progressbar(pg4, style="Blue.Horizontal.TProgressbar", mode="indeterminate")
-    prog.pack(fill="x", pady=(6, 12))
-    logbox = scrolledtext.ScrolledText(pg4, height=10, wrap="word", bg="#070b13", fg="#9fb6d6",
-                                       relief="flat", font=(MONO, 8), padx=12, pady=10, bd=0,
-                                       highlightthickness=1, highlightbackground=LINE)
+    # ----- Pagina 4: Instalacion -----
+    pg4 = ctk.CTkFrame(content, fg_color="transparent")
+    prog = ctk.CTkProgressBar(pg4, mode="indeterminate", progress_color=C_BLUE, height=10, corner_radius=6)
+    prog.pack(fill="x", pady=(4, 14))
+    logbox = ctk.CTkTextbox(pg4, fg_color="#070d17", border_color=C_BORDER, border_width=1,
+                            corner_radius=14, font=("Consolas", 11), text_color="#8FB4DE", wrap="word")
     logbox.pack(fill="both", expand=True)
 
-    # ---- Pagina 5: Finalizacion ----
-    pg5 = tk.Frame(body, bg=BG)
-    fin_wrap = tk.Frame(pg5, bg=BG); fin_wrap.pack(expand=True)
-    if hero_img:
-        tk.Label(fin_wrap, image=hero_img, bg=BG).pack(pady=(0, 6))
-    tk.Label(fin_wrap, text="¡Todo listo!", bg=BG, fg=TXT, font=(UI, 18, "bold")).pack()
-    tk.Label(fin_wrap, text="El filtro ya está activo. Reinicia el navegador para activar\nel bloqueo de búsquedas.",
-             bg=BG, fg=MUT, font=(UI, 10), justify="center").pack(pady=(6, 0))
-
-    # ===================== NAVEGACION =====================
-    navbar = tk.Frame(mainf, bg=BG); navbar.pack(fill="x", padx=44, pady=(0, 24))
-    lang = tk.Frame(navbar, bg=CARD2, highlightthickness=1, highlightbackground=LINE)
-    tk.Label(lang, text="", bg=CARD2, fg=MUT, font=(MDL2, 9)).pack(side="left", padx=(10, 5), pady=6)
-    tk.Label(lang, text="Español", bg=CARD2, fg=TXT, font=(UI, 9)).pack(side="left", padx=(0, 12))
-    lang.pack(side="left")
-
-    state = {"i": 0, "installing": False, "done": False}
-    btn_next = boton(navbar, "Siguiente  ›", lambda: on_next(), primary=True)
-    btn_next.pack(side="right")
-    btn_cancel = boton(navbar, "Cancelar", cerrar, primary=False)
-    btn_cancel.pack(side="right", padx=(0, 10))
-    btn_back = boton(navbar, "‹  Atrás", lambda: go(state["i"] - 1), primary=False)
-    btn_back.pack(side="right", padx=(0, 10))
+    # ----- Pagina 5: Finalizacion -----
+    pg5 = ctk.CTkFrame(content, fg_color="transparent")
+    fwrap = ctk.CTkFrame(pg5, fg_color="transparent"); fwrap.pack(expand=True)
+    if hero_sm:
+        ctk.CTkLabel(fwrap, text="", image=hero_sm).pack(pady=(0, 10))
+    ctk.CTkLabel(fwrap, text="¡Todo listo!", font=F(22, "bold"), text_color=C_TXT).pack()
+    ctk.CTkLabel(fwrap, text="El filtro ya está activo. Reinicia el navegador para activar\nel bloqueo de búsquedas.",
+                 font=F(12), text_color=C_SEC, justify="center").pack(pady=(8, 0))
 
     pages = [pg0, pg1, pg2, pg3, pg4, pg5]
     META = [
-        ([("Bienvenido a ", TXT), ("Filtro de Contenido", BLUE_LT)], "Este asistente te guiará en la instalación del programa."),
-        ([("Términos de uso", TXT)], "Léelos con calma y acéptalos para continuar."),
-        ([("Contraseña", TXT)], "La necesitarás para desactivar el filtro más adelante."),
-        ([("Componentes", TXT)], "Esto es lo que se instalará en tu equipo."),
-        ([("Instalación", TXT)], "Instalando todos los módulos. No cierres la ventana."),
-        ([("Finalización", TXT)], "Instalación completada."),
+        ([("Bienvenido a ", C_TXT), ("Filtro de Contenido", C_BLUE2)], "Este asistente te guiará en la instalación del programa."),
+        ([("Términos de uso", C_TXT)], "Léelos con calma y acéptalos para continuar."),
+        ([("Ubicación", C_TXT)], "Dónde se instalará el programa en tu equipo."),
+        ([("Componentes", C_TXT)], "Lo que se instalará y tu clave de protección."),
+        ([("Instalación", C_TXT)], "Instalando todos los módulos. No cierres la ventana."),
+        ([("Finalización", C_TXT)], "Instalación completada."),
     ]
 
+    # ============================ PIE (footer) ============================
+    footer = ctk.CTkFrame(right, fg_color="transparent")
+    footer.grid(row=2, column=0, sticky="ew", padx=48, pady=(18, 30))
+    ctk.CTkFrame(footer, height=1, fg_color=C_BORDER).pack(fill="x", pady=(0, 16))
+    bar = ctk.CTkFrame(footer, fg_color="transparent"); bar.pack(fill="x")
+
+    lang = ctk.CTkFrame(bar, fg_color=C_CARD, corner_radius=10, border_width=1, border_color=C_BORDER)
+    lang.pack(side="left")
+    ctk.CTkLabel(lang, text=G_GLOBE, font=FM(12), text_color=C_SEC).pack(side="left", padx=(12, 6), pady=8)
+    ctk.CTkLabel(lang, text="Español", font=F(11), text_color=C_TXT).pack(side="left")
+    ctk.CTkLabel(lang, text=G_CHEVDOWN, font=FM(10), text_color=C_FAINT).pack(side="left", padx=(8, 12))
+
+    state = {"i": 0, "installing": False, "done": False}
+    btn_next = ctk.CTkButton(bar, text="Siguiente", width=140, height=42, corner_radius=12,
+                             font=F(12, "bold"), fg_color=C_BLUE, hover_color=C_BLUE2,
+                             command=lambda: on_next())
+    btn_next.pack(side="right")
+    btn_cancel = ctk.CTkButton(bar, text="Cancelar", width=120, height=42, corner_radius=12,
+                               font=F(12, "bold"), fg_color=C_CARD, hover_color=C_HOVER,
+                               text_color=C_SEC, border_width=1, border_color=C_BORDER,
+                               command=lambda: cerrar())
+    btn_cancel.pack(side="right", padx=(0, 12))
+    btn_back = ctk.CTkButton(bar, text="Atrás", width=100, height=42, corner_radius=12,
+                             font=F(12, "bold"), fg_color=C_CARD, hover_color=C_HOVER,
+                             text_color=C_SEC, border_width=1, border_color=C_BORDER,
+                             command=lambda: go(state["i"] - 1))
+    btn_back.pack(side="right", padx=(0, 12))
+
+    def cerrar():
+        if not state["installing"]:
+            root.destroy()
+
+    def _warn(msg):
+        from tkinter import messagebox
+        messagebox.showwarning(APP_TITLE, msg)
+
+    # ---- log seguro entre hilos ----
     q = queue.Queue()
     def log(msg): q.put(str(msg))
     def drain():
@@ -546,57 +550,31 @@ def gui():
         for p in pages:
             p.pack_forget()
         pages[i].pack(fill="both", expand=True)
-        set_title(META[i][0]); t_sub.set(META[i][1])
+        set_title(META[i][0]); sub_lbl.configure(text=META[i][1])
         paint_steps(i)
-        if hero_lbl:
-            if i == 0:
-                hero_lbl.place(relx=1.0, x=-24, y=70, anchor="ne")
-            else:
-                hero_lbl.place_forget()
+        if i == 0:
+            hero_lbl.grid()
+        else:
+            hero_lbl.grid_remove()
         installing = state["installing"]
         btn_back.configure(state=("normal" if (i in (1, 2, 3) and not installing) else "disabled"))
         btn_cancel.configure(state=("disabled" if installing else "normal"))
         if i == 3:
-            btn_next.configure(text="Instalar  ›")
+            btn_next.configure(text="Instalar")
         elif i == 4:
             btn_next.configure(text="Instalando…")
         elif i == 5:
             btn_next.configure(text="Finalizar")
         else:
-            btn_next.configure(text="Siguiente  ›")
+            btn_next.configure(text="Siguiente")
         state["i"] = i
-
-    def on_next():
-        if state["installing"]:
-            return
-        i = state["i"]
-        if i == 0:
-            go(1)
-        elif i == 1:
-            if not acepta.get():
-                warn("Debes aceptar los términos para continuar."); return
-            go(2)
-        elif i == 2:
-            p1, p2 = e1.get(), e2.get()
-            if len(p1) < 8:
-                warn("La contraseña debe tener al menos 8 caracteres."); return
-            if p1 != p2:
-                warn("Las contraseñas no coinciden."); return
-            go(3)
-        elif i == 3:
-            go(4); start_install(e1.get())
-        elif i == 4:
-            if not state["done"]:
-                start_install(e1.get())
-        elif i == 5:
-            root.destroy()
 
     def start_install(pwd):
         state["installing"] = True
         btn_next.configure(state="disabled", text="Instalando…")
         btn_back.configure(state="disabled"); btn_cancel.configure(state="disabled")
         paint_steps(4)
-        prog.configure(mode="indeterminate"); prog.start(12)
+        prog.configure(mode="indeterminate"); prog.start()
 
         def worker():
             ok = False
@@ -606,23 +584,44 @@ def gui():
                 log(f"ERROR: {e}")
 
             def fin():
-                prog.stop(); prog.configure(mode="determinate"); prog["value"] = 100
+                prog.stop(); prog.configure(mode="determinate"); prog.set(1.0)
                 state["installing"] = False; state["done"] = bool(ok)
-                btn_cancel.configure(state="normal")
-                btn_next.configure(state="normal")
+                btn_cancel.configure(state="normal"); btn_next.configure(state="normal")
                 if ok:
                     go(5)
                 else:
-                    t_sub.set("Hubo un problema. Revisa el registro de abajo.")
+                    sub_lbl.configure(text="Hubo un problema. Revisa el registro de abajo.")
                     btn_next.configure(text="Reintentar")
             root.after(0, fin)
 
         threading.Thread(target=worker, daemon=True).start()
 
+    def on_next():
+        if state["installing"]:
+            return
+        i = state["i"]
+        if i in (0, 2):
+            go(i + 1)
+        elif i == 1:
+            if not acepta.get():
+                _warn("Debes aceptar los términos para continuar."); return
+            go(2)
+        elif i == 3:
+            p1, p2 = e1.get(), e2.get()
+            if len(p1) < 8:
+                _warn("La contraseña debe tener al menos 8 caracteres."); return
+            if p1 != p2:
+                _warn("Las contraseñas no coinciden."); return
+            go(4); start_install(p1)
+        elif i == 4:
+            if not state["done"]:
+                start_install(e1.get())
+        elif i == 5:
+            root.destroy()
+
     go(0)
-    root.after(80, lambda: (root.deiconify(), root.lift(), root.focus_force()))
     if "--gui-selftest" in sys.argv:
-        root.after(700, root.destroy)   # prueba: abrir y cerrar sin bloquear
+        root.after(800, root.destroy)   # prueba: abrir y cerrar sin bloquear
     root.mainloop()
 
 
@@ -632,11 +631,9 @@ def main():
         return modo_check()
     if "--gui-selftest" in sys.argv:
         gui(); return 0   # prueba de interfaz, sin elevar
-    # Elevar a administrador antes de mostrar nada (instalar requiere admin).
     if not es_admin():
         if relanzar_elevado():
             return 0
-        # si no se pudo elevar, seguimos igual y la instalacion avisara.
     gui()
     return 0
 
