@@ -623,6 +623,9 @@ def gui():
     if "--gui-selftest" in sys.argv:
         root.after(800, root.destroy)   # prueba: abrir y cerrar sin bloquear
     root.mainloop()
+    # Salida limpia: customtkinter/darkdetect dejan hilos NO-daemon vivos que,
+    # tras cerrar la ventana, dejarian el proceso colgado. Forzamos el fin.
+    os._exit(0)
 
 
 # --------------------------------------------------------------------------
