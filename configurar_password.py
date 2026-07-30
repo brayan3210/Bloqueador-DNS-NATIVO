@@ -23,7 +23,7 @@ def main():
     if not os.path.exists(CONFIG_PATH) and os.path.exists(EXAMPLE_PATH):
         shutil.copy(EXAMPLE_PATH, CONFIG_PATH)
 
-    with open(CONFIG_PATH, "r", encoding="utf-8") as f:
+    with open(CONFIG_PATH, "r", encoding="utf-8-sig") as f:  # tolera BOM
         config = json.load(f)
 
     p1 = getpass.getpass("Nueva contrasena para desactivar el filtro: ")

@@ -44,7 +44,7 @@ def cargar_config():
     for ruta in CONFIG_CANDIDATOS:
         if os.path.exists(ruta):
             try:
-                with open(ruta, "r", encoding="utf-8") as f:
+                with open(ruta, "r", encoding="utf-8-sig") as f:  # tolera BOM
                     cfg = json.load(f)
                 return cfg.get("proxy_busquedas", {}) or {}
             except Exception:

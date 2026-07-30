@@ -41,7 +41,10 @@ LOG_PATH = os.path.join(BASE, "logs", "bloqueados.log")
 # Carga de configuracion y listas
 # --------------------------------------------------------------------------
 def cargar_config():
-    with open(CONFIG_PATH, "r", encoding="utf-8") as f:
+    # utf-8-sig tolera un BOM al inicio (si algun editor/PowerShell lo agrego) sin
+    # romperse. Antes, un BOM en config.json hacia crashear el filtro al arrancar
+    # (proceso muerto -> sin DNS -> sin internet tras cada reinicio).
+    with open(CONFIG_PATH, "r", encoding="utf-8-sig") as f:
         return json.load(f)
 
 

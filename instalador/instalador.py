@@ -163,7 +163,7 @@ def ejecutar_instalacion(password, log):
     ejemplo = os.path.join(base, "config.example.json")
     try:
         if os.path.exists(ejemplo):
-            with open(ejemplo, "r", encoding="utf-8") as f:
+            with open(ejemplo, "r", encoding="utf-8-sig") as f:  # tolera BOM
                 cfg = json.load(f)
         else:
             cfg = {}
